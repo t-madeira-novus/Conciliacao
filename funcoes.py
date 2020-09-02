@@ -1,6 +1,7 @@
 import pandas as pd
 from tqdm import tqdm
 
+
 def _pega_numero(string):
     numero = [int(s) for s in string.split() if s.isdigit()]
     if numero != []:
