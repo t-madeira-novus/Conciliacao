@@ -2,7 +2,8 @@ from appJar import gui
 from funcoes import _conciliar_impostos, _conciliar_fornecedor_cliente
 
 def _ajuda(submenu):
-    aux = 'Este sistema é capaz de .\n\n\n' \
+    aux = 'Este sistema é capaz de realizar a conciliação entre débito e crédito das contas de impostos, fornecedores e' \
+          'clientes, através do relatório \"Razão\" extraído da Domínio.\n\n' \
           'Como usar:\n' \
           'i) Excluir as 6 primeiras linhas do relatório gerada pela Domínio, de modo que a primeira linha seja o nome ' \
           'das colunas (Data, Histórico, Débito, Crédito, etc.)\n\n'\
