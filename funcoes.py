@@ -6,14 +6,27 @@ def _pega_numero(string):
     numero = [int(s) for s in string.split() if s.isdigit()]
     if numero != []:
         numero.sort(reverse = True)
-        return numero[0]
+        numero = str(numero[0])
+
+        if len(numero) >= 6:
+            numero = numero[-5:]
+
+        return int(numero)
     else:
-        numero = string.split("-")[0]
-        numero = [int(s) for s in numero.split() if s.isdigit()]
-        try:
-            return numero[0]
-        except IndexError:
-            return -1
+        return 'Sem número'
+        # numero = string.split("-")[0]
+        # numero = [int(s) for s in numero.split() if s.isdigit()]
+        # numero = str(numero)
+        # print (numero)
+        #
+        # if len(numero) >= 6:
+        #     numero = numero[-5:]
+        # try:
+        #     return int(numero)
+        # except IndexError:
+        #     return -1
+        # except ValueError:
+        #     return -1
 
 
 def _conciliar_impostos(df, app):
@@ -53,8 +66,7 @@ def _conciliar_impostos(df, app):
     app.infoBox("Fim", "Conciliação terminada. Planilha com históricos não conciliados salva no mesmo caminho da "
                        "planilha usada para a conciliação")
 
-
-    df.to_excel(path_to_save)
+    df.to_excel(path_to_save, index=False)
 
 def _conciliar_fornecedor_cliente(df, app):
     path_df = df
@@ -83,9 +95,10 @@ def _conciliar_fornecedor_cliente(df, app):
     dict = {}
     for i in tqdm(df.index):
         # if pd.isna(df.at[i, 'Histórico']) == False:
-        historico = str(df.at[i, 'Histórico'])
+        historico = str(df.at[i, 'Histórico']).replace('-', ' ')
+        df.at[i, 'Histórico'] = str(df.at[i, 'Histórico']) + " (" + str(_pega_numero(historico)) + ")"
         numero_nota = _pega_numero(historico)
-        print(str(historico) + ": " + str(numero_nota))
+        #print(str(historico) + ": " + str(numero_nota))
         # if numero_nota != [] :
         if numero_nota not in dict:
             dict[numero_nota] = [0, 0, []]
@@ -102,13 +115,27 @@ def _conciliar_fornecedor_cliente(df, app):
         if dict[nota][1] == dict[nota][0]:
             indexes_to_drop.append(dict[nota][2])
     flat_list = [item for sublist in indexes_to_drop for item in sublist]
-    df.drop(flat_list, inplace=True)
+
+    indexes_to_drop_2 = []
+    for i in tqdm(df.index):
+        if float(df.at[i, "Débito"]) > 0:
+            for j in df.index:
+                if float(df.at[j, "Crédito"]) > 0:
+                    if float(df.at[i, "Débito"]) == float(df.at[j, "Crédito"]):
+                        flat_list.append(i)
+                        flat_list.append(j)
+
+    flat_list = list(set(flat_list))
 
     print(dict)
     print(flat_list)
 
+    df.drop(flat_list, inplace=True)
+    # df.drop(indexes_to_drop_2, inplace=True)
+
+
     app.infoBox("Fim", "Conciliação terminada. Planilha com históricos não conciliados salva no mesmo caminho da "
                        "planilha usada para a conciliação")
 
-    df.to_excel(path_to_save)
+    df.to_excel(path_to_save, index=False)
 
